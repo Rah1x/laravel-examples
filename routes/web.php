@@ -3,15 +3,15 @@ use Illuminate\Support\Facades\Route;
 
 /** Lorem Ipsum section **/
 $rg_array = [
-'section_id' => 6,
-'section_prefix'=>'lorem',
+    'section_id' => 6,
+    'section_prefix'=>'lorem',
 
-'prefix' => 'lorem',
-'namespace' => 'lorem',
-'middleware' => ['web'],
+    'prefix' => 'lorem',
+    'namespace' => 'lorem',
+    'middleware' => ['web'],
 
-'global_pg_title' => 'Lorem Ipsum Global Title',
-'global_icon' => 'lorem.png',
+    'global_pg_title' => 'Lorem Ipsum Global Title',
+    'global_icon' => 'lorem.png',
 ];
 
 Route::group($rg_array, function() use($rg_array) {
