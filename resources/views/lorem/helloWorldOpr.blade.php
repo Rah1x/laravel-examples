@@ -3,8 +3,6 @@
 
 <div class="grid_title_bar opp_title_bar">
 <h1>
-    <?php if($read_only<=0) { ?><input type="button" class="button reset_cache opp_red_bk" value="&laquo; Back" onclick="window.location='<?=$back_page.$param2?>';" />&nbsp;
-    <div class="mobile_only" style="clear:both; height:5px;">&nbsp;</div><?php } ?>
     <?=$pg_title?>
 </h1>
 </div>
@@ -233,7 +231,7 @@ $(document).ready(function(){
         <div class="label">Performed By:</div>
         <div class="val">
             <?php if($read_only<=0) { ?>
-            <?php $performed_by = (empty($empt['performed_by']))? $cw_member_id:$empt['performed_by']; ?>
+            <?php $performed_by = (empty($empt['performed_by']))? $lorem_contacts:$empt['performed_by']; ?>
             <select id="performed_by" name="performed_by" style="width:200px;" tabindex="<?=$tabindex++?>">
             <option value="">Select-</option>
             <?php foreach($lorem_contacts as $v){echo "<option value=\"{$v['id']}\">{$v['name']}</option>";} ?>

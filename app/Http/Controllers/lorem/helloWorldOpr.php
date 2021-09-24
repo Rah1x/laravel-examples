@@ -124,7 +124,7 @@ class helloWorldOpr extends OprAbstract
      * POST_ori vs POST = POST_ori is as it was posted, where as POST is sanatized in the main controller
      * 'Components' = this form has dynamic set of mini forms within called Components (1:M relationship in one page basically)
      */
-    private function process_req()
+    private function process_form()
     {
         #/ Check Attempts
         if(checkAttempts::check_attempts(6, $this->S_PREFIX.'MSG_GLOBAL')==false){
@@ -546,7 +546,7 @@ class helloWorldOpr extends OprAbstract
         {
             if(!empty($this->POST) && isset($this->POST['performed_by']))
             {
-                $tot_ers = (int)@$this->process_req();
+                $tot_ers = (int)@$this->process_form();
                 if($tot_ers==0)
                 {
                     if(!empty($this->pdf_sess_key))
