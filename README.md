@@ -1,4 +1,4 @@
-# laravel Samples 2021
+## laravel Samples 2021
 
 Here are some Laravel coding samples to show you how I work. Its not runnable as files not connected to each other but it gives you general idea about my coding style and depth.
 
@@ -6,7 +6,7 @@ Ive placed the files in appropriate directories based on `laravel 7x` (but only 
 
 Lastly, Ive left notes as comments in each file to let you know whats going on (as much as I could).
 
-# Example work in this sample:
+## Example work in this sample:
 
 1) <b>app\Http\Controllers\lorem\helloWorldOpr.php</b>\
 The example controller ive got here is a form processor that does `Add`, `Edit`, `Clone` as well as uses a 3rd party vendor to `generate pdf` and then also `emails the pdf as an attachment`. This ive done to show you the deep extend of things we can do with a form in laravel with much ease.
@@ -37,7 +37,7 @@ Generally I do a lot more efforts in naming conventions but in this sample I jus
 
 Let me know if you need even more samples for more fun and tricky things I do in laravel.
 
-# Commenting:
+## Commenting:
 
 Generally I use the following convention:
 1. `#/` code block heading related to few line(s) of code after
@@ -48,11 +48,11 @@ Generally I use the following convention:
 
 In this sample, ive done extra extra commenting to tell you whats going on.
 
-# Spacing:
+## Spacing:
 
 Spacing, indentation and commenting are very important to me
 
-# Design pattern for CRUD Operation:
+## Design pattern for CRUD Operation:
 
 https://en.wikipedia.org/wiki/Post/Redirect/Get
 
