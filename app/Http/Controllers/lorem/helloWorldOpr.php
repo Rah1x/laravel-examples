@@ -1,8 +1,10 @@
 <?php
 /**
- * Operation (Opr) file that does the Add/Edit/Clone/Read operations of the CRUD. I usually do the Delete with the list page where they can be deleted directly from the grid.
+ * Operation (Opr) file that does the Add/Edit/Clone/Read operations of the CRUD.
+ * I usually do the Delete with the list page where they can be deleted directly from the grid.
+ * * The related file is helloWorld.php.
  *
- * Modes of Operation in this file = Add, Edit, Clone, readOnly, PDF Certificate Generate, PDF Download, PDF Email
+ * Operation in this file = Add, Edit, Clone, readOnly, PDF Certificate Generate, PDF Download, PDF Email
  * entry point = index(), start reading from there. Also note the initialize and construct are called before the entry point
  */
 namespace App\Http\Controllers\lorem;
