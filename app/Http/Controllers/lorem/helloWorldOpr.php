@@ -3,7 +3,7 @@
  * Operation (Opr) file that does the Add/Edit/Clone/Read operations of the CRUD. I usually do the Delete with the list page where they can be deleted directly from the grid.
  *
  * Modes of Operation in this file = Add, Edit, Clone, readOnly, PDF Certificate Generate, PDF Download, PDF Email
- * entry point = index method (as listed in the route file)
+ * entry point = index(), start reading from there. Also note the initialize and construct are called before the entry point
  */
 namespace App\Http\Controllers\lorem;
 
@@ -14,20 +14,20 @@ use Illuminate\Support\Facades\DB;
 use Validator;
 
 #/ Helpers
-use h1, h2, h3, r, m, checkAttempts;
-use App\Http\Helpers\{c1, c2, c3};
-use App\Http\Helpers\pdfHelper;
+use h1, h2, h3, r, m, checkAttempts; //these are defined in the config/app.php and so can be called directly
+use App\Http\Helpers\{c1, c2, c3}; //these are not defined in the config and needs to be called with full path
+use App\Http\Helpers\pdfHelper; //or you can call them one by one
 use dPDF; //using DOMPDF to generate pdf as well
 
 #/ Mail
 use Illuminate\Support\Facades\Mail;
-use App\Mail\testMailObject;
+use App\Mail\testMailClass;
 
 #/ Models
 use App\Models\{lorem_model_1, Er_component, m3};
 
 #/ Abstract
-use App\Http\Abstracts\OprAbstract; //this abstract has the many properties and methods used in almost all Opr pages
+use App\Http\Abstracts\OprAbstract; //this abstract has the many properties and methods used in almost all Opr pages, it also has common functions and partial methods so hence its not an intertface
 
 class helloWorldOpr extends OprAbstract
 {
@@ -41,13 +41,12 @@ class helloWorldOpr extends OprAbstract
     }
 
     /**
-     * [Notes]:
+     * [What is that]:
      *
-     * rec_id = if provided, we are in the 'EDIT' mode
+     * rec_id = if provided, we are in the 'EDIT' mode, otherwise we are in ADD mode
      * cp_rec = id of the record to clone
      *
-     * opr_init = defined in the abstract
-     *
+     * opr_init() = defined in the abstract
      */
     protected function initialize()
     {
@@ -60,7 +59,7 @@ class helloWorldOpr extends OprAbstract
         $this->cp_rec = (int)@$this->GET['cp_rec'];
 
 
-        #/ list of fixed collections to be used in the module
+        #/ example list of fixed collections to be used in the module
         $this->lorem_fixed_dropdown = [
         'component_types'=> [
             'flash' => 'Flash',
@@ -95,7 +94,7 @@ class helloWorldOpr extends OprAbstract
             $recRow['generated_on'] = '';
             }
 
-            #/ break date fields
+            #/ break datetime field into Date and Time fields
             $recRow['start_ts_dt'] = @date('Y-m-d', strtotime($recRow['start_ts']));
             $recRow['start_ts_tm'] = @date('H:i', strtotime($recRow['start_ts']));
 
@@ -118,10 +117,10 @@ class helloWorldOpr extends OprAbstract
 
 
     /**
-     * [notes]
+     * [What is that]:
      *
-     * checkAttempts = my own system to enforce max attempts per form for a random timeout (prevents brute force)
-     * POST_ori vs POST = POST_ori is as it was posted, where as POST is sanatized in the main controller
+     * checkAttempts() = my own system to enforce max attempts per form for a random timeout (prevents brute force)
+     * POST_ori vs POST = POST_ori is as it was posted, where as POST is sanatized (all done in the parent controller)
      * 'Components' = this form has dynamic set of mini forms within called Components (1:M relationship in one page basically)
      */
     private function process_form()
@@ -138,44 +137,40 @@ class helloWorldOpr extends OprAbstract
         if($this->cp_rec>0)
         $rec_id = 0;
 
-        $POST_ori = $this->POST_ori;
+        $POST_ori = $this->POST_ori; //just so ive to type less words!
         $POST = $this->POST;
         $succ_msgs = [];
 
 
-        #/ set date fields to compare
+        #/ set datetime fields from posted date and time fields
         $POST['start_ts'] = $POST_ori['start_ts'] = @date('Y-m-d H:i:s', strtotime($POST_ori['start_ts_dt'].' '.$POST_ori['start_ts_tm']));
         $POST['end_ts'] = $POST_ori['end_ts'] = @date('Y-m-d H:i:s', strtotime($POST_ori['end_ts_dt'].' '.$POST_ori['end_ts_tm']));
 
 
         ##/ Validate Fields
         $req_flds = [
-        'lorem_ticket_id' => 'integer',
-        'ipsum_serial_no' => 'max:50',
-        'performed_by' => 'required',
-        'witnessed_by' => 'required',
+            'lorem_ticket_id' => 'integer',
+            'ipsum_serial_no' => 'max:50',
+            'performed_by' => 'required',
 
-        'start_ts_dt' => 'required|date_format:"Y-m-d"',
-        'start_ts_tm' => ['required', 'regex:/^[0-2]{0,1}[0-9]{1}\:[0-9]{1,2}$/'], //date_format:"G:i"
+            'start_ts_dt' => 'required|date_format:"Y-m-d"',
+            'start_ts_tm' => ['required', 'regex:/^[0-2]{0,1}[0-9]{1}\:[0-9]{1,2}$/'], //date_format:"G:i" is not enough so i had to use regex
 
-        'end_ts_dt' => 'required|date_format:"Y-m-d"',
-        'end_ts_tm' => 'required|regex:/^[0-2]{0,1}[0-9]{1}\:[0-9]{1,2}$/', //date_format:"G:i"
+            'end_ts_dt' => 'required|date_format:"Y-m-d"',
+            'end_ts_tm' => 'required|regex:/^[0-2]{0,1}[0-9]{1}\:[0-9]{1,2}$/',
 
-        'end_ts' => 'date|date_format:Y-m-d H:i:s|after:start_ts',
+            'end_ts' => 'date|date_format:Y-m-d H:i:s|after:start_ts',
         ];
 
-
-        $validation_attribs = [
-        'lorem_ticket_id'=> 'Ticket',
-        'performed_by'=>'Performed By',
-        'witnessed_by'=>'Witnessed By',
-
-        'start_ts_dt'=>'Timestamp / Start Date',
-        'start_ts_tm'=>'Timestamp / Start Time',
-        'end_ts_dt' => 'Timestamp / End Date',
-        'end_ts_tm' => 'Timestamp / End Time',
-        'start_ts' => 'Timestamp / Start',
-        'end_ts' => 'Timestamp / End',
+        $validation_field_labels = [
+            'lorem_ticket_id'=> 'Ticket',
+            'performed_by'=>'Performed By',
+            'start_ts_dt'=>'Timestamp / Start Date',
+            'start_ts_tm'=>'Timestamp / Start Time',
+            'end_ts_dt' => 'Timestamp / End Date',
+            'end_ts_tm' => 'Timestamp / End Time',
+            'start_ts' => 'Timestamp / Start',
+            'end_ts' => 'Timestamp / End',
         ];
 
 
@@ -193,7 +188,7 @@ class helloWorldOpr extends OprAbstract
             "component_status.{$pk}" => 'required',
             ]);
 
-            $validation_attribs = array_merge($validation_attribs, [
+            $validation_field_labels = array_merge($validation_field_labels, [
             "component_type.{$pk}" => 'Component '.($pk+1).' / Type',
             "component_model.{$pk}" => 'Component '.($pk+1).' / Model',
             "component_serial.{$pk}" => 'Component '.($pk+1).' / Serial',
@@ -205,7 +200,7 @@ class helloWorldOpr extends OprAbstract
         }
 
 
-        $validator = Validator::make($POST_ori, $req_flds)->setAttributeNames($validation_attribs);
+        $validator = Validator::make($POST_ori, $req_flds)->setAttributeNames($validation_field_labels);
 
         if($validator->errors()->count()>0)
         {
@@ -219,7 +214,7 @@ class helloWorldOpr extends OprAbstract
 
         ##/ Check if Ticket Exists
         $lorem_ticket_id = (int)@$POST['lorem_ticket_id'];
-        $POST['old_ticket'] = (int)@$POST['old_ticket'];
+        $POST['old_ticket'] = (int)@$POST['old_ticket']; //if the ticket is changed to a new value in EDIT mode
         $tkt_co = '';
 
         if($lorem_ticket_id>0)
@@ -254,12 +249,11 @@ class helloWorldOpr extends OprAbstract
 
         #/ Setup payload
         $sv_ar = [
-        'lorem_ticket_id'=> $lorem_ticket_id,
-        'start_ts'=> $POST['start_ts'],
-        'end_ts'=> $POST['end_ts'],
-        'ipsum_serial_no'=> @$POST['ipsum_serial_no'],
-        'performed_by' => @$POST['performed_by'],
-        'witnessed_by' => @$POST['witnessed_by'],
+            'lorem_ticket_id'=> $lorem_ticket_id,
+            'start_ts'=> $POST['start_ts'],
+            'end_ts'=> $POST['end_ts'],
+            'ipsum_serial_no'=> @$POST['ipsum_serial_no'],
+            'performed_by' => @$POST['performed_by'],
         ];
 
         #/ add Ticket's Company - only in ADD/CLONE mode - or in EDIT if ticket value is changed
@@ -317,7 +311,7 @@ class helloWorldOpr extends OprAbstract
                     $rec_data = @$rec->first();
 
                     $POST['generated_on'] = @$rec_data->generated_on;
-                    $POST['certificate_number'] = @$rec_data->certificate_number;
+                    $POST['file_number'] = @$rec_data->file_number;
                     $tkt_co = @$rec_data->co_name;
                 }
             }
@@ -343,13 +337,12 @@ class helloWorldOpr extends OprAbstract
                 $res_sv = true;
 
                 #/ Add certificate number
-                $POST['certificate_number'] = 'T-ERC-'.str_pad($rec_id, 10, '0', STR_PAD_LEFT);
-                $rec->update(['certificate_number'=>$POST['certificate_number']]);
+                $POST['file_number'] = 'F-'.str_pad($rec_id, 10, '0', STR_PAD_LEFT);
+                $rec->update(['file_number'=>$POST['file_number']]);
 
                 $POST['generated_on'] = $sv_ar['generated_on'];
             }
         }
-
 
 
         if($res_sv == false) {
@@ -362,7 +355,7 @@ class helloWorldOpr extends OprAbstract
         #-
 
 
-        #/ Delete cache
+        #/ Delete cache of the list page this individual record is part of
         if($rec_id>0) {
         @Redis::del($this->list_cache_key);
         $this->param2_ar['rec_id'] = $rec_id;
@@ -377,9 +370,8 @@ class helloWorldOpr extends OprAbstract
             $POST['generated_by'] = $this->loggedin_user_id;
             $POST['co_name'] = $tkt_co;
 
-            #/ Get components
+            #/ Get additonal related data
             h2::get_lorem_contacts($this->lorem_contacts, ($mode_opp=='add'));
-
 
             #/ setup PDF
             $pdf_res = pdfHelper::set_pdf_dec($rec_id, $POST, $this->lorem_contacts, $this->lorem_fixed_dropdown);
@@ -407,14 +399,14 @@ class helloWorldOpr extends OprAbstract
                 #/ Setup email
                 $mail_obj = new testMailObject();
                 $mail_obj->send_mail("Subject {$lorem_ticket_id}", "", $body_in, [
-                'text_only'=> true,
-                'attachment_base64'=> true,
-                'frm_nm'=> @$_ENV['MAIL_FROM_name'],
-                'frm_email'=> @$_ENV['MAIL_FROM'],
+                    'text_only'=> true,
+                    'attachment_base64'=> true,
+                    'frm_nm'=> @$_ENV['MAIL_FROM_name'],
+                    'frm_email'=> @$_ENV['MAIL_FROM'],
                 ], [[
-                'data'=> @base64_encode($pdf->stream()),
-                'name'=> $file_name,
-                'mime'=> 'application/pdf'
+                    'data'=> @base64_encode($pdf->stream()),
+                    'name'=> $file_name,
+                    'mime'=> 'application/pdf'
                 ]]);
 
                 #/ Send email
@@ -445,94 +437,47 @@ class helloWorldOpr extends OprAbstract
 
         checkAttempts::reset_attempt_counts();
         return 0;
-
-    }
-
-
-    private function get_pdf(int $rec_id)
-    {
-        if($rec_id<=0) return false;
-
-        #/ Get records
-        $recRow = $this->get_record($rec_id);
-        if(empty($recRow) || empty(@$recRow['performed_by'])) {
-        return false;
-        }
-
-        #/ Get components
-        h2::get_lorem_contacts($this->lorem_contacts);
-
-        #/ Setup pdf
-        $pdf_res = pdfHelper::set_pdf_dec($rec_id, $recRow, $this->lorem_contacts, $this->lorem_fixed_dropdown);
-        $pdf = @$pdf_res['pdf'];
-        $file_name = @$pdf_res['fn'];
-        if(empty($pdf) || empty($file_name)){
-        return false;
-        }
-
-        #/ Output pdf
-        $pdf_view = @$pdf->stream($file_name);
-        if(empty($pdf_view)){
-        return false;
-        }
-
-        pdfHelper::download_pdf($file_name, $pdf_view);
-        return true;
     }
 
     ///////////////////////////////////////////////////////////////// Main Controller
 
     /**
-     * Notes:
+     * [What is that]:
      *
-     * read_only = defined, captured and set in the abstract file. Sets the mode of operation to readonly
+     * read_only = defined and set in the abstract file. it sets the mode of operation to `readonly`
      * global_msg = used to set global message displayed in the header to the user
-     * map_refill_fields = refills form data to what was posted by the user. Basically, if there is an error the form is to be refilled to the user doesnt have to refill all of it again, and if its all good then its 'Post-RedireT-Get'
+     *
+     * map_refill_fields = refills form data to what was posted by the user. Basically, if there is an error the form is to be refilled so the user doesnt have to fill all of it again
      */
     public function index()
     {
-        #/ special direct pdf (from list page)
-        if(!empty($this->GET['gpdf']) && $this->read_only && $this->rec_id>0)
-        {
-            if($this->get_pdf($this->rec_id)==false) {
-            r::global_msg($this->S_PREFIX."MSG_GLOBAL", 'Unable to download the PDF! Please check the Ticket, or contact the development team.');
-            return redirect()->route($this->back_route, array_diff_key($this->param2_ar, array_flip(array('ro'))));
-            exit;
-            }
-        }
-
-        #/ pdf download (from this page)
+        #/ download pdf request
         if(!empty($this->GET['pdfk']) && !$this->read_only)
         {
             if(pdfHelper::output_pdf($this->GET['pdfk'])==false)
             {
                 r::global_msg($this->S_PREFIX."MSG_GLOBAL", 'Unable to download the PDF! Please check the Ticket, or contact the development team.');
                 return redirect()->route($this->cur_route, array_diff_key($this->GET, array_flip(array('pdfk'))));
-                exit;
+                exit; //just me being paranoid, otherwise it has already stopped at `return`
             }
         }
 
-
-        #/ Get records for CLONE mode
+        #/ CLONE mode: Get records
         if($this->cp_rec>0 && !$this->read_only)
         {
             $this->recRow = $this->get_record($this->cp_rec);
-            if($this->recRow==false) {
+            if($this->recRow==false)
             return redirect()->route($this->back_route, array_diff_key($this->GET, array_flip(array('cp_rec'))));
-            exit;
-            }
         }
 
-        #/ Get records for EDIT & ReadOnly modes
+        #/ EDIT & ReadOnly modes: Get records
         if($this->rec_id>0)
         {
             $this->recRow = $this->get_record($this->rec_id);
-            if($this->recRow==false) {
+            if($this->recRow==false)
             return redirect()->route($this->back_route, array_diff_key($this->GET, array_flip(array('rec_id'))));
-            exit;
-            }
 
-            #/ Only allow owners or superadmin to edit
+            #/ Security Feature: only allow Owners or superadmin to Edit
             if(!$this->read_only && !$this->is_superAdmin && $this->recRow['generated_by']!=$this->loggedin_user_id)
             {
                 r::global_msg($this->S_PREFIX."MSG_GLOBAL", "Permission Denied! You can only Edit the report you generated yourself!");
@@ -541,13 +486,13 @@ class helloWorldOpr extends OprAbstract
             }
         }
 
-        #/ Handle Form Postings
+        #/ process form Postings
         if($this->read_only<=0)
         {
             if(!empty($this->POST) && isset($this->POST['performed_by']))
             {
-                $tot_ers = (int)@$this->process_form();
-                if($tot_ers==0)
+                $tot_errors = (int)@$this->process_form();
+                if($tot_errors==0)
                 {
                     if(!empty($this->pdf_sess_key))
                     r::sess_save('pdf_key_'.$this->rec_id, $this->pdf_sess_key); //saving pdf data in the cache to get it later
@@ -557,17 +502,15 @@ class helloWorldOpr extends OprAbstract
             }
             else
             {
-                #/ get pdf key from sess
+                #/ get pdf key from sess and start a pdf download request (logic: if the key is set the frontend JS code will request the pdf to be downloaded)
                 $pdf_key = r::sess('pdf_key_'.$this->rec_id);
-
                 if(!empty($pdf_key))
                 {
                     r::flush_sess('pdf_key_'.$this->rec_id);
 
                     $pdf_sess_data = @r::sess($pdf_key);
-                    if(!empty($pdf_sess_data)){
+                    if(!empty($pdf_sess_data))
                     $this->pdf_sess_key = $pdf_key;
-                    }
                 }
             }
         }
@@ -579,43 +522,42 @@ class helloWorldOpr extends OprAbstract
         }
 
 
-        #/ Get components
+        #/ Get some Get additonal related data from helpers (might be in the cache or in the database)
         h2::get_lorem_contacts($this->lorem_contacts, true);
 
 
         ##/ pass vars to view
         $pg_title = $this->read_only>0? "Lorem Ipsum Form &raquo; ":"Lorem Ipsum Form &raquo; ";
 
-        if($this->read_only>0){ $pg_title.= 'Review '; }else{
+        if($this->read_only>0){ $pg_title.= 'Review '; } else {
         $pg_title.= $this->rec_id>0? "Edit ": ($this->cp_rec>0? "Clone ":"New ");
         }
 
-        $view_ar = array_merge($this->view_ar, array(
-        'pg_title' => $pg_title,
-        'read_only' => $this->read_only,
-        'back_page' => empty($this->back_route)?'':route($this->back_route),
-        'param2' => $this->param2,
-        'rec_id' => $this->rec_id,
-        'cp_rec' => $this->cp_rec,
-        'recRow' => $this->recRow,
-        'lorem_contacts' => $this->lorem_contacts,
-        'lorem_fixed_dropdown' => $this->lorem_fixed_dropdown,
-        ));
+        $view_ar = array_merge($this->view_ar, [
+            'pg_title' => $pg_title,
+            'read_only' => $this->read_only,
+            'back_page' => empty($this->back_route)? '':route($this->back_route),
+            'param2' => $this->param2,
+            'rec_id' => $this->rec_id,
+            'cp_rec' => $this->cp_rec,
+            'recRow' => $this->recRow,
+            'lorem_contacts' => $this->lorem_contacts,
+            'lorem_fixed_dropdown' => $this->lorem_fixed_dropdown,
+        ]);
 
-        if($this->read_only==1){
-        $view_ar = array_merge($view_ar, array(
-        'no_header' => true,
-        ));
+        if($this->read_only==1) {
+        $view_ar = array_merge($view_ar, [
+            'no_header' => true,
+        ]);
 
-        }else{
-        $view_ar = array_merge($view_ar, array(
-        'load_jquery_ui' => true,
-        'pdfk'=> $this->pdf_sess_key,
-        ));
+        } else {
+        $view_ar = array_merge($view_ar, [
+            'load_jquery_ui' => true,
+            'pdfk'=> $this->pdf_sess_key,
+        ]);
         }
         #-
 
         return view('lorem.helloWorldOpr', $view_ar);
-
     }
 }

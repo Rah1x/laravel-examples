@@ -1,6 +1,7 @@
 <?php
-/** this is a test job to show what im doing in jobs
+/** this is a test job to show what im doing in jobs as an example
  * This particular example pulls data from an api and stores (insert, update, or delete) into an SQL database
+ * entry point = handle()
 */
 
 namespace App\Jobs;
@@ -12,22 +13,21 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Exception;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #/ Helpers
 use h1, h2; //these are defined in the config/app.php and so can be called directly
-use App\Http\Helpers\{h3, h4};
+use App\Http\Helpers\{h3, h4}; //these are not defined in the config and needs to be called with full path
 
 class TestJob1 implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels; //there are Traits in php
 
     public $tries = 1; //The number of times the job may be attempted
     public $timeout = 3600; //1 hr  = The number of seconds the job can run before timing out
 
-    private $job_msg=[];
+    private $job_msg = [];
 
     private $api_obj, $db_conn;
 
@@ -61,8 +61,7 @@ class TestJob1 implements ShouldQueue
                 continue;
             }
 
-            if(empty($ipsum_v['TotalEndpoints'])) continue;
-            if($ipsum_v['Suspended']=='1') continue;
+            if($ipsum_v['Suspended']=='1') continue; //some checks
 
 
             #/ setup ipsums payload
@@ -74,7 +73,7 @@ class TestJob1 implements ShouldQueue
             //continue; //debug
 
 
-            #/ paginated dolors pull (and reauthenticate if needed)
+            #/ paginated api pull of 2nd dimension list (and reauthenticate if needed)
             $page_n=0; $dolors_list=[]; $pull_more=false;
             do
             {
@@ -83,16 +82,18 @@ class TestJob1 implements ShouldQueue
                 if($dolors_listx==='token_epired')
                 {
                     #/ re-auth and try again
-                    if($this->api_obj->auth()==false){
-                    $ret_msgs['Step 3.1: re-Authenticate'] = '[r]Failure[/r]';
-                    break 2;
+                    if($this->api_obj->auth()==false)
+                    {
+                        $ret_msgs['Step 3.1: re-Authenticate'] = '[r]Failure[/r]';
+                        break 2;
                     }
                     else
                     {
                         $dolors_listx = $this->api_obj->pull_list($ipsum_v['ipsumId'], $page_n);
+
                         if($dolors_listx==='token_epired') {
-                        $ret_msgs['Step 3.2: re-Authenticate'] = '[r]Failure[/r]';
-                        break 2;
+                            $ret_msgs['Step 3.2: re-Authenticate'] = '[r]Failure[/r]';
+                            break 2;
                         }
                     }
                 }
@@ -125,8 +126,8 @@ class TestJob1 implements ShouldQueue
 
                 $sv_dolors_i[] = [
                     'ipsum_id'=> $ipsum_v['ipsumId'],
-                    'host_name'=> @substr($th['HostName'], 0, 35),
-                    'file_name'=> @substr(h2::sanitize($th['FileName']), 0, 200),
+                    'host_name'=> substr($th['HostName'], 0, 35),
+                    'file_name'=> substr(h2::sanitize($th['FileName']), 0, 200), //names can have unwanted chars, so sanitizing the value
                     'user_name'=> @h2::sanitize($th['ExtendedInfo']['UserName']),
                     'last_seen'=> @date('Y-m-d H:i:s', strtotime($th['LastSeen'])),
                 ];
@@ -150,7 +151,7 @@ class TestJob1 implements ShouldQueue
             $sv_ipsums_batches = array_chunk($sv_ipsums, 70); //chunking array to prevent sql's binding overload error
             foreach($sv_ipsums_batches as $v)
             {
-                $db_obj->table('WAREHOUSE_ipsums')
+                $db_obj->table('WAREHOUSE_ipsums_parent')
                 ->insert($v);
             }
 
@@ -160,7 +161,7 @@ class TestJob1 implements ShouldQueue
                 $sv_dolors_batches = array_chunk($sv_dolors, 70); //chunking array to prevent sql's binding overload error
                 foreach($sv_dolors_batches as $v)
                 {
-                    $db_obj->table('WAREHOUSE_dolors_v2')
+                    $db_obj->table('WAREHOUSE_dolors_children')
                     ->insert($v);
                 }
             }
@@ -171,8 +172,9 @@ class TestJob1 implements ShouldQueue
         foreach($del_ipsums as $v)
         {
             if(!empty($v))
-            $db_obj->table('WAREHOUSE_ipsums')->where('ipsum_id', $v)->delete();
+            $db_obj->table('WAREHOUSE_ipsums_parent')->where('ipsum_id', $v)->delete();
         }
+
 
         #/ results message
         $ret_msgs["Outcome of the operation"] = "
@@ -185,31 +187,23 @@ class TestJob1 implements ShouldQueue
 
     //////------------------------------------------------------
 
-    private function run_it()
-    {
-        $this->api_obj = new h3();
-        $this->db_conn = 'sqlsrv_lorem_1';
-
-        $results = [];
-
-        #/ Run the process
-        $ret_msgs = $this->start_job();
-        if(!empty($ret_msgs)) $results['Upload lorem data to ipsum task'] = $ret_msgs;
-
-        #/ email results & return
-        h4::results_to_admin($results, 'Scheduled Job Results');
-        return true;
-    }
-
-    //////------------------------------------------------------
-
     public function handle()
     {
         @ini_set('max_execution_time', 0);
         @set_time_limit(0);
 
-        $this->run_it();
+        $this->api_obj = new h3();
+        $this->db_conn = 'sqlsrv_lorem_1';
 
+        #/ Run the process
+        $results = [];
+        $ret_msgs = $this->start_job();
+        if(!empty($ret_msgs)) $results['Upload lorem data to ipsum task'] = $ret_msgs;
+
+        #/ Email results
+        h4::results_to_admin($results, 'Scheduled Job Results');
+
+        #/ Report Notices to Admin (if any)
         if(!empty($this->job_msg))
         h4::report_back('Lorem Ipsum Job', implode("\n\n", $this->job_msg), 200);
 

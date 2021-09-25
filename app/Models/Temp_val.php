@@ -13,7 +13,7 @@ class Temp_val extends Model
     public $timestamps = false;
     protected $guarded = [];
 
-    protected $primaryKey = 'key';
+    protected $primaryKey = 'key_field';
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -27,7 +27,7 @@ class Temp_val extends Model
 
     public static function get_recs($return_keys=[])
     {
-        //self::clr_che(); //manual flush for debug
+        //self::clr_che(); //debug
 
         #/ Get all records
         $records = Cache::rememberForever('temp_vals', function()
@@ -40,12 +40,10 @@ class Temp_val extends Model
             }
             return $records;
         });
-        //r::var_dumpx($records);
 
         if(empty($return_keys)) {
         return $records;
         }
-
 
         #/ Extract required keys
         return array_intersect_key($records, array_flip($return_keys));

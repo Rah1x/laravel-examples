@@ -1,35 +1,22 @@
 @extends('layouts.shell')
 @section('innerBody')
 
-<div class="grid_title_bar opp_title_bar">
-<h1>
-    <?=$pg_title?>
-</h1>
-</div>
-
 <?php if($read_only<=0) { ?>
-<div style="clear:both; height:15px;">&nbsp;</div>
-<br class="hide_below_775" /><?php } ?>
-
-
-<?php if($read_only<=0) { ?>
-<script src="{{asset('assets/js/attempts.js')}}"></script>
 <script>
-document.getElementById('mask_1').style.display='';
 $(document).ready(function() {
-    document.getElementById('mask_1').style.display='none';
 
-    //calendars
-    $(function() {
-        $.init_calendar('start_ts_dt');
-        $.init_calendar('end_ts_dt');
-    });
+//JQuery calendars
+$(function() {
+    $.init_calendar('start_ts_dt');
+    $.init_calendar('end_ts_dt');
+});
 
-/** frontend form validation, also note that the frontend has its own form attempts check based on js. **/
+
+/** frontend form validation. This is for user mistakes and it not really a security feature, real validation is done at the backend
+Also note that the frontend has its own form attempts checker based on js. **/
 $.check_this = function()
 {
     var err = '';
-
 
     if(document.getElementById('lorem_ticket_id').value==''){}else
     if(document.getElementById('lorem_ticket_id').value.search(/^[0-9]{1,}$/i)<0) {
@@ -138,53 +125,38 @@ $.check_this = function()
     else
     {
 
-        ///*#/ Check attempts to form submission
+        //#/ Check attempts to form submission
         if(aCheck(20)==false){
         err += '<strong class="red-txt">Too Many Too Fast!</strong><br />Please try again after a few minutes ..';
         fancyAlert('Error', "<div style='height:10px;' />"+err+"<div style='height:15px;' />");
         return false;
-        }//*/
+        }
 
-        //reset_attempt_counts(); //DONT = auto reset after wait from within the aCheck function
         return true;
     }
 
     return false;
-
-};//end func....
+};
 
 $.submit_report = function()
 {
     if($.check_this()==false){return false;}
     return true;
+}
+//------------------------------------------------------------------
 
-}//end func....
-
-});
-
-//////////////////////////////////////////////////////////////
-</script>
-
-
-<script>
 var tab_index = 2000;
-
 var new_smax = -1;
+
+/** This method creates mini forms within the form dynamically on click. I will leave this code out, let me know if you need to see it **/
 function add_more_component_items(def_v, copy_first_row)
 {
-    /** This method creates mini forms within the form, I will leavr this code out, let me know if you need to see it **/
-
     $(clone_v).insertBefore('.'+keyword+'items #last_divi');
 };
-
-
-$(document).ready(function(){
-
-    /** Here we pregenerate the components if we are in EDIT mode, or in form-refill (error) mode **/
+//------------------------------------------------------------------
 
 });
 </script>
-<!-- //////////////////// -->
 <?php } ?>
 
 
@@ -242,21 +214,6 @@ $(document).ready(function(){
             <?php }else{ ?><?php echo empty($lorem_contacts[$empt['performed_by']])? $empt['performed_by']:$lorem_contacts[$empt['performed_by']]["name"]; ?><?php } ?>
         </div>
         <div style="clear:both; height:10px;"></div>
-
-
-        <div class="label">Witnessed By:</div>
-        <div class="val">
-            <?php if($read_only<=0) { ?>
-            <select id="witnessed_by" name="witnessed_by" style="width:200px;" tabindex="<?=$tabindex++?>">
-            <option value="">Select-</option>
-            <?php foreach($lorem_contacts as $v){echo "<option value=\"{$v['id']}\">{$v['name']}</option>";} ?>
-            </select>
-            <?php if(isset($empt['witnessed_by'])) echo "<script>document.getElementById('witnessed_by').value='{$empt['witnessed_by']}';</script>"; ?>
-            <span class="req">&nbsp;*</span>
-
-            <?php }else{ ?><?php echo empty($lorem_contacts[$empt['witnessed_by']])? $empt['witnessed_by']:$lorem_contacts[$empt['witnessed_by']]["name"]; ?><?php } ?>
-        </div>
-        <div style="clear:both; height:20px;"></div>
 
 
         <div class="label">Timestamp:</div>
@@ -330,7 +287,8 @@ $(document).ready(function(){
             <div style='margin-top:-10px;'><a href="javascript:void(0);" class="reset_cache_txt" style="font-weight:bold; text-shadow: 0 0 3px #fcf764;"
             onclick="add_more_component_items(null, true);">Or copy first row into a new row? Click here.</a></div>
 
-            <?php }
+            <?php
+            }
             else
             {
                 $a_i = 0;

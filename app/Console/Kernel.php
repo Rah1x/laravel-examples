@@ -1,14 +1,16 @@
 <?php
 /**
- * Using this to (1) run schedules (2)initiate queue jobs at a schedule via laravel queues managed by supervisord on server.
- * Important thing to note here is to make sure no command has `exit` or `die` otherwise next command will not execute. Instead they should `return`
- */
+ * I Use this to (1) run schedules; (2)initiate queue jobs at a schedule via laravel queues (managed by supervisord on the server)
+*/
 
 namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+/**
+ * V. Important: Make sure no command has `exit` or `die` otherwise next command will not execute, instead they should `return`
+*/
 class Kernel extends ConsoleKernel
 {
     protected $commands = [];

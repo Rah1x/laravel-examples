@@ -17,7 +17,7 @@ This shows how I run various schedules and jobs behind the scene without user in
 3) <b>app\Jobs\TestJob1.php</b>\
 An example of a Job that is pulls data from a 3rd party API and after some processing saves that data into an sql database.
 
-4) <b>app\Mail\testMailObject.php</b>\
+4) <b>app\Mail\testMailClass.php</b>\
 Mail object used to customize emails and assign templates.
 
 5) <b>app\Models\Temp_val.php</b>\
@@ -31,6 +31,8 @@ Route file, see how I pass additional params to each route, I catch them in the 
 
 8) <b>app\Http\Abstracts, app\Http\Helpers, app\Models</b>\
 These folders are not in laravel itself, but ive created them to better oprganize my code.
+
+Let me know if you need even more samples for more fun and tricky things I do in laravel.
 
 # Commenting:
 
