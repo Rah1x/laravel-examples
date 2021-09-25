@@ -8,7 +8,7 @@ Lastly, Ive left notes as comments in each file to let you know whats going on (
 
 # Example work in this sample:
 
-1) app\Http\Controllers\lorem\helloWorldOpr.php\
+1) <b>app\Http\Controllers\lorem\helloWorldOpr.php</b>\
 The example controller ive got here does `Add`, `Edit`, `Clone` as well as uses a 3rd party vendor to `generate pdf` and then also `emails the pdf as attachment`. This ive done to show you the deep extend of things we can do with a form in laravel with much ease.
 
 2) app\Console\Kernel.php\
