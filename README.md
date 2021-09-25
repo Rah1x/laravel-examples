@@ -1,4 +1,4 @@
-## laravel Samples 2021
+# laravel Samples 2021
 
 Here are some Laravel coding samples to show you how I work. Its not runnable as files not connected to each other but it gives you general idea about my coding style and depth.
 
