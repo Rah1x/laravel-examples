@@ -32,16 +32,19 @@ Route file, see how I pass additional params to each route, I catch them in the 
 8) <b>app\Http\Abstracts, app\Http\Helpers, app\Models</b>\
 These folders are not in laravel itself, but ive created them to better oprganize my code.
 
+9) Naming conventions:\
+Generally I do a lot more efforts in naming conventions but in this sample I just wanted to do bit more of the logic so I might have skipped it
+
 Let me know if you need even more samples for more fun and tricky things I do in laravel.
 
 # Commenting:
 
 Generally I use the following convention:
-1. `#/` to place information or section heading related to few line(s) of code after
+1. `#/` code block heading related to few line(s) of code after
 2. `//` small hint about the code on the left to this
-3. `//` to comment out few lines of code to delete later or debug
-4. `/* */` to define a whole block (class, method etc) as a formal descriptor
-5. `/* */` To comment out a whole block of code
+3. `//` also, to comment out few lines of code
+4. `/* */` to define a whole block (class, method etc) with a formal descriptor
+5. `/* */` also, to comment out a whole block of code
 
 In this sample, ive done extra extra commenting to tell you whats going on.
 

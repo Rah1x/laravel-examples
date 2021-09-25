@@ -1,10 +1,10 @@
 <?php
+namespace App\Mail;
+
 /**
  * I use this to define mail themes for emails. There could be different themes with different mailable objects.
  * This mail class also is used to attach files to emails
 */
-
-namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;

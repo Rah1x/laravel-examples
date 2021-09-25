@@ -1,4 +1,6 @@
 <?php
+namespace App\Http\Controllers\lorem;
+
 /**
  * Operation (Opr) file that does the Add/Edit/Clone/Read operations of the CRUD.
  * I usually do the Delete with the list page where they can be deleted directly from the grid.
@@ -7,7 +9,6 @@
  * Operation in this file = Add, Edit, Clone, readOnly, PDF Certificate Generate, PDF Download, PDF Email
  * entry point = index(), start reading from there. Also note the initialize and construct are called before the entry point
  */
-namespace App\Http\Controllers\lorem;
 
 #/ Core
 use Illuminate\Http\Request;
@@ -121,14 +122,14 @@ class helloWorldOpr extends OprAbstract
     /**
      * [What is that]:
      *
-     * checkAttempts() = my own system to enforce max attempts per form for a random timeout (prevents brute force)
+     * checkAttempts() = my own helper code I use to enforce max attempts per form for a random timeout (this prevents brute force)
      * POST_ori vs POST = POST_ori is as it was posted, where as POST is sanatized (all done in the parent controller)
      * 'Components' = this form has dynamic set of mini forms within called Components (1:M relationship in one page basically)
      */
     private function process_form()
     {
         #/ Check Attempts
-        if(checkAttempts::check_attempts(6, $this->S_PREFIX.'MSG_GLOBAL')==false){
+        if(checkAttempts::check_attempts(10)==false) { //10 attempts
             checkAttempts::update_attempt_counts();
             return 1;
         }
@@ -202,13 +203,13 @@ class helloWorldOpr extends OprAbstract
         }
 
 
-        $validator = Validator::make($POST_ori, $req_flds)->setAttributeNames($validation_field_labels);
+        $validation_res = Validator::make($POST_ori, $req_flds)->setAttributeNames($validation_field_labels);
 
-        if($validator->errors()->count()>0)
+        if($validation_res->errors()->count()>0)
         {
-            r::global_msg($this->S_PREFIX."MSG_GLOBAL", $validator->errors()->messages());
+            r::global_msg($this->S_PREFIX."MSG_GLOBAL", $validation_res->errors()->messages());
             checkAttempts::update_attempt_counts();
-            return $validator->errors()->count();
+            return $validation_res->errors()->count();
         }
         #-
 

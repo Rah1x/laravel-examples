@@ -1,9 +1,9 @@
 <?php
+namespace App\Console;
+
 /**
  * I Use this to (1) run schedules; (2)initiate queue jobs at a schedule via laravel queues (managed by supervisord on the server)
 */
-
-namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;

@@ -1,4 +1,6 @@
 <?php
+namespace App\Http\Controllers\services;
+
 /**
  * The controller for list/grid page that shows list of records.
  * The related file is helloWorldOpr.php.
@@ -6,8 +8,6 @@
  * Operation in this file = read, search, sort, delete
  * entry point = index()
  */
-
-namespace App\Http\Controllers\services;
 
 #/ System
 use Illuminate\Http\Request;

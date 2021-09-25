@@ -1,10 +1,10 @@
 <?php
+namespace App\Jobs;
+
 /** this is a test job to show what im doing in jobs as an example
  * This particular example pulls data from an api and stores (insert, update, or delete) into an SQL database
  * entry point = handle()
 */
-
-namespace App\Jobs;
 
 #/ Core
 use Illuminate\Bus\Queueable;

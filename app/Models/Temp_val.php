@@ -1,9 +1,9 @@
 <?php
+namespace App\Models;
+
 /** I moved all Models into a this folder to keep things clean, though its not part of laravel 7x
  * In this particular example, the data is cached via laravel cache facade (redis at the back). However its not always the case and other models dont have to be as such
 */
-
-namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
