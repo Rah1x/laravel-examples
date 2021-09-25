@@ -12,9 +12,24 @@ Lastly, Ive left notes as comments in each file to let you know whats going on (
 The example controller ive got here does `Add`, `Edit`, `Clone` as well as uses a 3rd party vendor to `generate pdf` and then also `emails the pdf as attachment`. This ive done to show you the deep extend of things we can do with a form in laravel with much ease.
 
 2) <b>app\Console\Kernel.php</b>\
-This shows how I run various schedules and jobs
+This shows how I run various schedules and jobs behind the scene without user interaction
 
-3) <b>app\Http\Abstracts, app\Http\Helpers, app\Models</b>\
+3) <b>app\Jobs\TestJob1.php</b>\
+An example of a Job that is pulls data from a 3rd party API and after some processing saves that data into an sql database
+
+4) <b>app\Mail\testMailObject.php</b>\
+Mail object used to customize emails and assign templates
+
+5) <b>app\Models\Temp_val.php</b>\
+Example of a Model that caches results for optimized performance
+
+6) <b>resources\views\lorem\helloWorldOpr.blade.php</b>\
+Example of a view using blade and js
+
+7) <b>routes\web.php</b>\
+Route file, see how pass additional params to each route, I catch them in the parent controller via `$request->route()->getAction()`
+
+8) <b>app\Http\Abstracts, app\Http\Helpers, app\Models</b>\
 These folders are not in laravel itself, but ive created them to better oprganize my code
 
 # Commenting:
