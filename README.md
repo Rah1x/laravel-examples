@@ -2,35 +2,35 @@
 
 Here are some Laravel coding samples to show you how I work. Its not runnable as files not connected to each other but it gives you general idea about my coding style and depth.
 
-Ive placed the files in appropriate directories based on laravel 7x (but only those dirs that I needed for the samples and not all the dirs of laravel setup are here), therefore please check all dirs for example files. The coding is in php7x.
+Ive placed the files in appropriate directories based on `laravel 7x` (but only those dirs that I needed for the samples and not all the dirs of laravel setup are here), therefore please check all dirs for example files. The coding is in `php7x`.
 
 Lastly, Ive left notes as comments in each file to let you know whats going on (as much as I could).
 
 # Example work in this sample:
 
 1) <b>app\Http\Controllers\lorem\helloWorldOpr.php</b>\
-The example controller ive got here does `Add`, `Edit`, `Clone` as well as uses a 3rd party vendor to `generate pdf` and then also `emails the pdf as attachment`. This ive done to show you the deep extend of things we can do with a form in laravel with much ease.
+The example controller ive got here is a form processor that does `Add`, `Edit`, `Clone` as well as uses a 3rd party vendor to `generate pdf` and then also `emails the pdf as an attachment`. This ive done to show you the deep extend of things we can do with a form in laravel with much ease.
 
 2) <b>app\Console\Kernel.php</b>\
-This shows how I run various schedules and jobs behind the scene without user interaction
+This shows how I run various schedules and jobs behind the scene without user interaction.
 
 3) <b>app\Jobs\TestJob1.php</b>\
-An example of a Job that is pulls data from a 3rd party API and after some processing saves that data into an sql database
+An example of a Job that is pulls data from a 3rd party API and after some processing saves that data into an sql database.
 
 4) <b>app\Mail\testMailObject.php</b>\
-Mail object used to customize emails and assign templates
+Mail object used to customize emails and assign templates.
 
 5) <b>app\Models\Temp_val.php</b>\
-Example of a Model that caches results for optimized performance
+Example of a Model that caches results for optimized performance.
 
 6) <b>resources\views\lorem\helloWorldOpr.blade.php</b>\
-Example of a view using blade and js
+Example of a view using blade and js.
 
 7) <b>routes\web.php</b>\
-Route file, see how pass additional params to each route, I catch them in the parent controller via `$request->route()->getAction()`
+Route file, see how I pass additional params to each route, I catch them in the parent controller via `$request->route()->getAction()`.
 
 8) <b>app\Http\Abstracts, app\Http\Helpers, app\Models</b>\
-These folders are not in laravel itself, but ive created them to better oprganize my code
+These folders are not in laravel itself, but ive created them to better oprganize my code.
 
 # Commenting:
 
