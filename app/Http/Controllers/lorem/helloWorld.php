@@ -1,14 +1,6 @@
 <?php
 namespace App\Http\Controllers\services;
 
-/**
- * The controller for list/grid page that shows list of records.
- * The related file is helloWorldOpr.php.
- *
- * Operation in this file = read, search, sort, delete
- * entry point = index()
- */
-
 #/ System
 use Illuminate\Http\Request;
 
@@ -22,16 +14,34 @@ use App\Models\lorem_model_1;
 #/ Abstract parent
 use App\Http\Abstracts\adminGrid; //this abstract has the many properties and methods used in almost all grid pages, it also has common functions and partial methods so hence its not an intertface
 
+/**
+ * The controller for list/grid page that shows list of records.
+ * The related file is helloWorldOpr.php.
+ *
+ * Operation in this file = read, search, sort, delete
+ * entry point = index()
+ */
+
 class helloWorld extends adminGrid
 {
-    private $lorem_contacts = [];
+    /**
+     * @var array $lorem_contacts
+     */
+    private array $lorem_contacts = [];
 
+    /**
+     * @param Request $request
+     */
     function __construct(Request $request)
     {
         parent::__construct($request);
         $this->grid_init();
     }
 
+    /**
+     * function grid_init
+     * initialises the grid
+     */
     protected function grid_init()
     {
         $this->view_ar['global_pg_title'] = 'Lorem Ipsum';
@@ -40,109 +50,136 @@ class helloWorld extends adminGrid
         $this->grid_setup();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-
+    /**
+     * function init_filters
+     * initialised the filters
+     */
     protected function init_filters()
     {
         $this->search_it = (int)@$this->GET["search_it"];
 
         $this->sr_ = array_merge($this->sr_, [
-        'generated_by'=> @array_diff(@explode('|', $this->GET["generated_by"]), ['']), //this field is a dropdown
+            'generated_by'=> @array_diff(@explode('|', $this->GET["generated_by"]), ['']), //this field is a dropdown
         ]);
 
         $this->sr_ = array_merge($this->sr_, h1::make_filters($this->GET, [
-        'certificate_number'=> 'opt_string',
-        'start_ts'=> 'date',
-        'co_name'=> 'opt_string',
-        'generated_on'=> 'date',
+            'certificate_number'=> 'opt_string',
+            'start_ts'=> 'date',
+            'co_name'=> 'opt_string',
+            'generated_on'=> 'date',
         ]));
 
         $this->sr_ = array_merge($this->sr_, [
-        'performed_by'=> @array_diff(@explode('|', $this->GET["performed_by"]), ['']), //this field is a dropdown
+            'performed_by'=> @array_diff(@explode('|', $this->GET["performed_by"]), ['']), //this field is a dropdown
         ]);
     }
 
-
+    /**
+     * function setup_sortOrder
+     * setup the sorting
+     */
     protected function setup_sortOrder()
     {
         $this->setup_sortings([
-        '6'=> 'generated_by',
-        '1'=> 'certificate_number',
-        '2'=> 'start_ts',
-        '3'=> 'co_name',
-        '4'=> 'performed_by',
-        '5'=> 'generated_on',
+            '6'=> 'generated_by',
+            '1'=> 'certificate_number',
+            '2'=> 'start_ts',
+            '3'=> 'co_name',
+            '4'=> 'performed_by',
+            '5'=> 'generated_on',
         ]);
     }
 
+    /**
+     * function setup_queryFilters
+     * setp the query based on the filters selected
+     */
     protected function setup_queryFilters()
     {
         $where = $having = "";
 
-    	if($this->search_it)
-    	{
+    	if ($this->search_it) {
             $src = new srchLib('binding');
             $get_where = $get_having = '';
 
-            //if($this->is_superAdmin)
-            if(!empty($this->sr_['generated_by']))
-            {
+            //if ($this->is_superAdmin)
+            if (!empty($this->sr_['generated_by'])) {
                 $get_where.="AND (";
                 $ci = 0;
-                foreach($this->sr_['generated_by'] as $cat_vv)
-                {
+                foreach($this->sr_['generated_by'] as $cat_vv) {
                     $rtx = $src->where_it($cat_vv, 'generated_by', 'generated_by', 'equals', ($ci==0?'':'OR'));
-                    $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);
+                    $get_where.=$rtx[0];
+                    $this->binding = array_merge($this->binding, $rtx[1]);
                     $ci++;
                 }
                 $get_where.=") \n\t";
             }
 
-
-            if(!empty($this->sr_['certificate_number']))
-            {
-                if(empty($this->sr_['certificate_number_opt']))
-                $this->sr_['certificate_number_opt'] = 1;
+            if (!empty($this->sr_['certificate_number'])) {
+                if (empty($this->sr_['certificate_number_opt'])) {
+                    $this->sr_['certificate_number_opt'] = 1;
+                }
 
                 $sr_dir = 'equals';
-                if($this->sr_['certificate_number_opt']==2)
-                $sr_dir = 'contains';
+                if ($this->sr_['certificate_number_opt']==2) {
+                    $sr_dir = 'contains';
+                }
+
                 $rtx = $src->where_it($this->sr_['certificate_number'], 'certificate_number', 'certificate_number', $sr_dir); //, 'AND', 'quoted'
-                $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);
+                $get_where.=$rtx[0];
+                $this->binding = array_merge($this->binding, $rtx[1]);
             }
 
+            if (!empty($this->sr_['start_ts_from'])) {
+                $rtx = $src->where_it($this->sr_['start_ts_from'].'T00:00:00', 'start_ts', '', 'greater-than-equals');
+                $get_where.=$rtx[0];
+                $this->binding = array_merge($this->binding, $rtx[1]);
+            }
 
-            if(!empty($this->sr_['start_ts_from'])){$rtx = $src->where_it($this->sr_['start_ts_from'].'T00:00:00', 'start_ts', '', 'greater-than-equals'); $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);}
-            if(!empty($this->sr_['start_ts_to'])){$rtx = $src->where_it($this->sr_['start_ts_to'].'T23:59:59', 'start_ts', '', 'less-than-equals'); $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);}
+            if (!empty($this->sr_['start_ts_to'])) {
+                $rtx = $src->where_it($this->sr_['start_ts_to'].'T23:59:59', 'start_ts', '', 'less-than-equals');
+                $get_where.=$rtx[0];
+                $this->binding = array_merge($this->binding, $rtx[1]);
+            }
 
-            if(!empty($this->sr_['co_name']))
-            {
-                if(empty($this->sr_['co_name_opt']))
-                $this->sr_['co_name_opt'] = 2;
+            if (!empty($this->sr_['co_name'])) {
+                if (empty($this->sr_['co_name_opt'])) {
+                    $this->sr_['co_name_opt'] = 2;
+                }
 
                 $sr_dir = 'equals';
-                if($this->sr_['co_name_opt']==2)
-                $sr_dir = 'contains';
+                if ($this->sr_['co_name_opt']==2) {
+                    $sr_dir = 'contains';
+                }
 
                 $rtx = $src->where_it($this->sr_['co_name'], 'co_name', 'co_name', $sr_dir);
-                $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);
+                $get_where.=$rtx[0];
+                $this->binding = array_merge($this->binding, $rtx[1]);
             }
 
-            if(!empty($this->sr_['performed_by']))
-            {
+            if (!empty($this->sr_['performed_by'])) {
                 $get_where.="AND (";
                 $ci = 0;
-                foreach($this->sr_['performed_by'] as $cat_vv)
-                {
+                foreach($this->sr_['performed_by'] as $cat_vv) {
                     $rtx = $src->where_it($cat_vv, 'performed_by', 'performed_by', 'equals', ($ci==0?'':'OR'));
-                    $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);
+                    $get_where.=$rtx[0];
+                    $this->binding = array_merge($this->binding, $rtx[1]);
                     $ci++;
                 }
                 $get_where.=") \n\t";
             }
 
-            if(!empty($this->sr_['generated_on_from'])){$rtx = $src->where_it($this->sr_['generated_on_from'].'T00:00:00', 'generated_on', '', 'greater-than-equals'); $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);}
-            if(!empty($this->sr_['generated_on_to'])){$rtx = $src->where_it($this->sr_['generated_on_to'].'T23:59:59', 'generated_on', '', 'less-than-equals'); $get_where.=$rtx[0]; $this->binding = array_merge($this->binding, $rtx[1]);}
+            if (!empty($this->sr_['generated_on_from'])) {
+                $rtx = $src->where_it($this->sr_['generated_on_from'].'T00:00:00', 'generated_on', '', 'greater-than-equals');
+                $get_where.=$rtx[0];
+                $this->binding = array_merge($this->binding, $rtx[1]);
+            }
+
+            if (!empty($this->sr_['generated_on_to'])) {
+                $rtx = $src->where_it($this->sr_['generated_on_to'].'T23:59:59', 'generated_on', '', 'less-than-equals');
+                $get_where.=$rtx[0];
+                $this->binding = array_merge($this->binding, $rtx[1]);
+            }
 
             $where .= $get_where;
             $having.= $get_having;
@@ -155,7 +192,10 @@ class helloWorld extends adminGrid
         $this->having = $having;
     }
 
-
+    /**
+     * function form_query
+     * form the sql query
+     */
     protected function form_query()
     {
         /** using direct sql here because ive got a lot of code coming in from filters and sortings that wont fit into ORM efficiently
@@ -168,7 +208,6 @@ class helloWorld extends adminGrid
         FROM lorem_model_1s
         WHERE 1=1
         %s", $this->where);
-
 
         $query = $query_m.sprintf("
         ORDER BY %s %s
@@ -185,9 +224,16 @@ class helloWorld extends adminGrid
         %s", $this->where);
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-
-    protected function get_results($calculate_total=false, $custom_cache_key=false, $conType='mysql', $block_1=false)
+    /**
+     * function get_results
+     * execute the sql query and get results
+     *
+     * @param bool $calculate_total; default false
+     * @param bool $custom_cache_key; default false
+     * @param string $conType; default 'mysql'
+     * @param bool $block_1; default false
+     */
+    protected function get_results(bool $calculate_total = false, bool $custom_cache_key = false, string $conType = 'mysql', bool $block_1 = false)
     {
         /*
         some additional workout here
@@ -200,65 +246,61 @@ class helloWorld extends adminGrid
         */
     }
 
+    /**
+     * function delete_entries
+     * delete one or more rows
+     */
     private function delete_entries()
     {
         $POST = $this->POST;
-        if(!isset($POST['command'])) {
-        return false;
+        if (!isset($POST['command'])) {
+            return false;
         }
 
         $rids = $POST['RecordID'];
-        if(empty($rids)){
-        return false;
-        } else {
-        $rids = @array_map(function($a){return ((int)$a);}, $rids);
-        }
 
+        if (empty($rids)) {
+            return false;
+        } else {
+            $rids = @array_map(function($a){return ((int)$a);}, $rids);
+        }
 
         ##/ Delete records
         $suc = false;
         $del_ids = $rids;
 
-        if(!empty($del_ids))
-        {
-            if($this->is_superAdmin) //superadmin can delete everyone's entry
-            {
+        if (!empty($del_ids)) {
+            if ($this->is_superAdmin) { //superadmin can delete everyone's entry
                 $rs = (int)@lorem_model_1::destroy($del_ids);
                 $suc = ($rs==@count($del_ids));
-            }
-            else //regular user can delete their own entries only
-            {
+            } else { //regular user can delete their own entries only
                 $rs = (int)@lorem_model_1::where('generated_by', $this->loggedin_user_id)->whereIn('id', $del_ids)->delete();
                 $suc = ($rs==@count($del_ids));
             }
         }
         #-
 
-
         #/ Return
-        if($suc)
-        {
+        if ($suc) {
             $msg = '<b>Success:</b> The selected record(s) were successfully deleted.';
-        }
-        else
-        {
+        } else {
             $msg = 'Some of the selected record(s) were not successfully deleted!';
         }
-
 
         r::global_msg($this->S_PREFIX."MSG_GLOBAL", $msg, $suc);
         return true;
     }
 
-    ///////////////////////////////////////////////////////////////// Main Controller
-
+    /**
+     * function index
+     * main controller (aka action) called from the route
+     */
     public function index()
     {
         #/ Delete
-        if(isset($this->POST['command']) && $this->POST['command']=='del')
-        {
-            if($this->delete_entries()==true){
-            $this->clr_cache = 1;
+        if (isset($this->POST['command']) && $this->POST['command']=='del') {
+            if ($this->delete_entries()==true) {
+                $this->clr_cache = 1;
             }
         }
 
@@ -271,7 +313,6 @@ class helloWorld extends adminGrid
         #/ Get some Get additonal related data from helpers (might be in the cache or in the database)
         h2::get_lorem_contacts($this->lorem_contacts, true); //active only due to load
 
-
         /** Generate header column <th>tags for the grid with orderby and order direction links */
         $th_ar = [
             ['label'=>'&nbsp;', 'width'=>'2'],
@@ -282,8 +323,8 @@ class helloWorld extends adminGrid
             ['label'=>'Performed By', 'width'=>'14', 'orderby'=>'4'],
             ['label'=>'Generated On', 'width'=>'12', 'orderby'=>'5', 'orderdir'=>'DESC'],
             ['label'=>'&nbsp;', 'width'=>'8'],
-        ]; $THs = h1::generate_THs($this->cur_page, $this->orderby, $this->orderdi, $th_ar);
-
+        ];
+        $THs = h1::generate_THs($this->cur_page, $this->orderby, $this->orderdi, $th_ar);
 
         /** Generate filters columns, this is special column to generate search fields right on top of the columns */
         $Tr_filters_ar = [
@@ -295,27 +336,27 @@ class helloWorld extends adminGrid
             ['type'=>'is_select_multiple', 'field_id'=>'performed_by', 'select_opts'=>$this->lorem_contacts, 'select_opt_value'=>'id', 'select_opt_display_name'=>'name', 'search_as_you_type'=>true],
             ['type'=>'date_between', 'field_id'=>'generated_on'],
             ['type'=>'empty', 'field_id'=>''],
-        ]; $Tr_filters = h1::generate_filters($this->sr_, $Tr_filters_ar);
-
+        ];
+        $Tr_filters = h1::generate_filters($this->sr_, $Tr_filters_ar);
 
         #/ pass vars to view
         $view_ar = array_merge($this->view_ar,
-        $this->common_view_ar(['btr', 'multi_select']),
-        array(
-            'load_select_all' => true,
-            'pg_title' => 'hello World List',
+            $this->common_view_ar(['btr', 'multi_select']), [
+                'load_select_all' => true,
+                'pg_title' => 'hello World List',
 
-            'THs' => $THs,
-            'Tr_filters' => $Tr_filters,
-            'total_cols' => count($Tr_filters_ar),
+                'THs' => $THs,
+                'Tr_filters' => $Tr_filters,
+                'total_cols' => count($Tr_filters_ar),
 
-            'dl_exdl' => false,
+                'dl_exdl' => false,
 
-            'is_superAdmin' => $this->is_superAdmin,
-            'lorem_contacts'=> $this->lorem_contacts,
+                'is_superAdmin' => $this->is_superAdmin,
+                'lorem_contacts'=> $this->lorem_contacts,
 
-            'add_btn' => 'Generate', //label to button
-        ));
+                'add_btn' => 'Generate', //label to button
+            ]
+        );
 
         return view($this->section_prefix.'.helloWorld', $view_ar);
     }

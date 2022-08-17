@@ -1,11 +1,6 @@
 <?php
 namespace App\Jobs;
 
-/** this is a test job to show what im doing in jobs as an example
- * This particular example pulls data from an api and stores (insert, update, or delete) into an SQL database
- * entry point = handle()
-*/
-
 #/ Core
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,49 +15,70 @@ use Illuminate\Support\Str;
 use h1, h2; //these are defined in the config/app.php and so can be called directly
 use App\Http\Helpers\{h3, h4}; //these are not defined in the config and needs to be called with full path
 
+/**
+ * This is a test job to show what im doing in jobs as an example
+ * This particular example pulls data from an api and stores (insert, update, or delete) into an SQL database
+ * entry point = handle()
+*/
+
 class TestJob1 implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels; //there are Traits in php
 
-    public $tries = 1; //The number of times the job may be attempted
-    public $timeout = 3600; //1 hr  = The number of seconds the job can run before timing out
+    /**
+     * @var int $tries; default 1
+     */
+    public int $tries = 1; //The number of times the job may be attempted
 
-    private $job_msg = [];
+    /**
+     * @var int $timeout; default 3600
+     */
+    public int $timeout = 3600; //1 hr  = The number of seconds the job can run before timing out
+
+    /**
+     * @var array $job_msg
+     */
+    private array $job_msg = [];
 
     private $api_obj, $db_conn;
 
-    public function __construct(){}
+    public function __construct() {
+        //empty
+    }
 
-    //////------------------------------------------------------
-
+    /**
+     * function start_job
+     */
     private function start_job()
     {
         #/ Step 1. Authenticate
-        if($this->api_obj->auth()==false) {
+        if ($this->api_obj->auth()==false) {
             return ['Step1: Authenticate with API'=> '[r]Failure[/r]'];
         }
 
         #/ Step 2. Pull list of Lorem Ipsum
         $arr_1 = $this->api_obj->pull_list();
-        if(empty($arr_1) || !is_array($arr_1)) {
+        if (empty($arr_1) || !is_array($arr_1)) {
             return ['Step2: Pull List from API'=> '[r]Failure[/r]'];
         }
 
         #/ Step 3. Loop each ipsum to pull data & setup payload to save
         $sv_ipsums = $sv_dolors = $del_ipsums = $ret_msgs = [];
 
-        foreach($arr_1 as $ipsum_v)
-        {
-            if(empty($ipsum_v['ipsumId'])) continue;
+        foreach($arr_1 as $ipsum_v) {
+            if (empty($ipsum_v['ipsumId'])) {
+                continue;
+            }
 
             #/ Identify for deletion
-            if($ipsum_v['Deactivated']=='1') {
+            if ($ipsum_v['Deactivated']=='1') {
                 $del_ipsums[] = $ipsum_v['ipsumId'];
                 continue;
             }
 
-            if($ipsum_v['Suspended']=='1') continue; //some checks
-
+            if ($ipsum_v['Suspended']=='1') { //some checks
+                continue;
+            }
 
             #/ setup ipsums payload
             $sv_ipsums[] = [
@@ -72,57 +88,50 @@ class TestJob1 implements ShouldQueue
 
             //continue; //debug
 
-
             #/ paginated api pull of 2nd dimension list (and reauthenticate if needed)
-            $page_n=0; $dolors_list=[]; $pull_more=false;
-            do
-            {
+            $page_n = 0; $dolors_list = []; $pull_more = false;
+            do {
                 $dolors_listx = $this->api_obj->pull_list($ipsum_v['ipsumId'], ++$page_n);
 
-                if($dolors_listx==='token_epired')
-                {
-                    #/ re-auth and try again
-                    if($this->api_obj->auth()==false)
-                    {
+                #/ re-auth and try again
+                if ($dolors_listx==='token_epired') {
+                    if ($this->api_obj->auth()==false) {
                         $ret_msgs['Step 3.1: re-Authenticate'] = '[r]Failure[/r]';
                         break 2;
-                    }
-                    else
-                    {
+                    } else {
                         $dolors_listx = $this->api_obj->pull_list($ipsum_v['ipsumId'], $page_n);
-
-                        if($dolors_listx==='token_epired') {
+                        if ($dolors_listx==='token_epired') {
                             $ret_msgs['Step 3.2: re-Authenticate'] = '[r]Failure[/r]';
                             break 2;
                         }
                     }
                 }
 
-                if(isset($dolors_listx['error']))
-                {
+                if (isset($dolors_listx['error'])) {
                     $ret_msgs[$ipsum_v['ipsumName']] = '[r]Error pulling dolors[/r][br]'.$dolors_listx['error'];
                     break;
                 }
 
-                if(!empty($dolors_listx[0]) && is_array($dolors_listx[0]))
-                $dolors_list = array_merge($dolors_list, $dolors_listx[0]);
-                else
-                break;
+                if (!empty($dolors_listx[0]) && is_array($dolors_listx[0])) {
+                    $dolors_list = array_merge($dolors_list, $dolors_listx[0]);
+                } else {
+                    break;
+                }
 
                 $pull_more = (bool)@$dolors_listx[1];
 
             } while(!empty($dolors_listx) || $pull_more);
 
-            if(empty($dolors_list) || !is_array($dolors_list)) {
+            if (empty($dolors_list) || !is_array($dolors_list)) {
                 continue;
             }
 
-
             #/ setup dolors payload
             $sv_dolors_i = [];
-            foreach($dolors_list as $th)
-            {
-                if(empty($th['LastSeen'])) continue;
+            foreach($dolors_list as $th) {
+                if (empty($th['LastSeen'])) {
+                    continue;
+                }
 
                 $sv_dolors_i[] = [
                     'ipsum_id'=> $ipsum_v['ipsumId'],
@@ -133,7 +142,7 @@ class TestJob1 implements ShouldQueue
                 ];
             }
 
-            if(empty($sv_dolors_i)) {
+            if (empty($sv_dolors_i)) {
                 $ret_msgs["{$ipsum_v['ipsumName']} / Setup dolor payload"] = '[r]Failure[/r]';
                 continue;
             }
@@ -142,25 +151,20 @@ class TestJob1 implements ShouldQueue
 
         }//end foreach ipsum...
 
-
         $db_obj = DB::connection($this->db_conn);
 
         #/ Save ipsums
-        if(!empty($sv_ipsums))
-        {
+        if (!empty($sv_ipsums)) {
             $sv_ipsums_batches = array_chunk($sv_ipsums, 70); //chunking array to prevent sql's binding overload error
-            foreach($sv_ipsums_batches as $v)
-            {
+            foreach($sv_ipsums_batches as $v) {
                 $db_obj->table('WAREHOUSE_ipsums_parent')
                 ->insert($v);
             }
 
             #/ Save dolors
-            if(!empty($sv_dolors))
-            {
+            if (!empty($sv_dolors)) {
                 $sv_dolors_batches = array_chunk($sv_dolors, 70); //chunking array to prevent sql's binding overload error
-                foreach($sv_dolors_batches as $v)
-                {
+                foreach($sv_dolors_batches as $v) {
                     $db_obj->table('WAREHOUSE_dolors_children')
                     ->insert($v);
                 }
@@ -168,13 +172,13 @@ class TestJob1 implements ShouldQueue
         }
 
         #/ Delete deactivated ipsums
-        if(!empty($del_ipsums))
-        foreach($del_ipsums as $v)
-        {
-            if(!empty($v))
-            $db_obj->table('WAREHOUSE_ipsums_parent')->where('ipsum_id', $v)->delete();
+        if (!empty($del_ipsums)) {
+            foreach($del_ipsums as $v) {
+                if (!empty($v)) {
+                    $db_obj->table('WAREHOUSE_ipsums_parent')->where('ipsum_id', $v)->delete();
+                }
+            }
         }
-
 
         #/ results message
         $ret_msgs["Outcome of the operation"] = "
@@ -185,8 +189,9 @@ class TestJob1 implements ShouldQueue
         return $ret_msgs;
     }
 
-    //////------------------------------------------------------
-
+    /**
+     * function handle
+     */
     public function handle()
     {
         @ini_set('max_execution_time', 0);
@@ -198,19 +203,26 @@ class TestJob1 implements ShouldQueue
         #/ Run the process
         $results = [];
         $ret_msgs = $this->start_job();
-        if(!empty($ret_msgs)) $results['Upload lorem data to ipsum task'] = $ret_msgs;
+        if (!empty($ret_msgs)) {
+            $results['Upload lorem data to ipsum task'] = $ret_msgs;
+        }
 
         #/ Email results
         h4::results_to_admin($results, 'Scheduled Job Results');
 
         #/ Report Notices to Admin (if any)
-        if(!empty($this->job_msg))
-        h4::report_back('Lorem Ipsum Job', implode("\n\n", $this->job_msg), 200);
+        if (!empty($this->job_msg)) {
+            h4::report_back('Lorem Ipsum Job', implode("\n\n", $this->job_msg), 200);
+        }
 
         //sleep(1); //add a gap before next job starts (if needed)
         //exit; //debug - prevents queued job from finishing
     }
 
+    /**
+     * function failed
+     * @param Exception $exception
+     */
     public function failed(Exception $exception)
     {
         h4::debug_email(

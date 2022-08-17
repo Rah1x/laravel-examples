@@ -1,31 +1,54 @@
 <?php
 namespace App\Models;
 
-/** I moved all Models into a this folder to keep things clean, though its not part of laravel 7x
- * In this particular example, the data is cached via laravel cache facade (redis at the back). However its not always the case and other models dont have to be as such
-*/
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * I moved all Models into this folder to keep things clean, though its not part of laravel 7x
+ * In this particular example, the data is cached via laravel cache facade (redis at the back). However its not always the case and other models dont have to be as such
+*/
+
 class Temp_val extends Model
 {
-    public $timestamps = false;
-    protected $guarded = [];
+    /**
+     * @var bool $timestamps; default = false
+     */
+    public bool $timestamps = false;
 
-    protected $primaryKey = 'key_field';
-    protected $keyType = 'string';
-    public $incrementing = false;
+    /**
+     * @var array $guarded
+     */
+    protected array $guarded = [];
 
+    /**
+     * @var string $primaryKey; default = 'key_field'
+     */
+    protected string $primaryKey = 'key_field';
 
-    public static function clr_che(){
-    Cache::forget('temp_vals');
+    /**
+     * @var string $keyType; default = 'string'
+     */
+    protected string $keyType = 'string';
+
+    /**
+     * @var bool $incrementing; default = false
+     */
+    public bool $incrementing = false;
+
+    /**
+     * function clr_che
+     */
+    public static function clr_che()
+    {
+        Cache::forget('temp_vals');
     }
 
-    //////////////////////////////////---------------------------------
-
-
-    public static function get_recs($return_keys=[])
+    /**
+     * function get_recs
+     * @param array $return_keys
+     */
+    public static function get_recs(array $return_keys = [])
     {
         //self::clr_che(); //debug
 
@@ -42,7 +65,7 @@ class Temp_val extends Model
         });
 
         if(empty($return_keys)) {
-        return $records;
+            return $records;
         }
 
         #/ Extract required keys

@@ -5,147 +5,146 @@
 <script>
 $(document).ready(function() {
 
-//JQuery calendars
-$(function() {
-    $.init_calendar('start_ts_dt');
-    $.init_calendar('end_ts_dt');
-});
-
-/** frontend form validation. This is for user mistakes and it not really a security feature, real validation is done at the backend
-Also note that the frontend has its own form attempts checker based on js. **/
-$.check_this = function()
-{
-    var err = '';
-
-    if (document.getElementById('lorem_ticket_id').value=='') {} else
-    if (document.getElementById('lorem_ticket_id').value.search(/^[0-9]{1,}$/i)<0) {
-        err += '<li><strong>Ticket Number</strong> can be numbers only!</li>';
-    }
-
-    if (document.getElementById('performed_by').value=='') {
-    err += '<li><strong>Er Performed By</strong> cannot be empty!</li>';
-    }
-
-    if (document.getElementById('witnessed_by').value=='') {
-    err += '<li><strong>Er Witnessed By</strong> cannot be empty!</li>';
-    }
-
-    //#/Timestamp
-    if (document.getElementById('start_ts_dt').value=='') {
-    err += '<li>Timestamp / <strong>Start Date</strong> cannot be empty!</li>';
-    }
-
-    document.getElementById('start_ts_tm').value = document.getElementById('start_ts_hour').value+':'+document.getElementById('start_ts_min').value;
-    if (document.getElementById('start_ts_tm').value==':') {
-    err += '<li>Timestamp / <strong>Start Time</strong> cannot be empty!</li>';
-    } else if (document.getElementById('start_ts_tm').value.search(/^[0-9]{1,2}:[0-9]{1,2}$/im)) {
-    err += '<li>Timestamp / <strong>Start Time</strong> is invalid!</li>';
-    }
-
-    if (document.getElementById('end_ts_dt').value=='') {
-    err += '<li>Timestamp / <strong>End Date</strong> cannot be empty!</li>';
-    }
-
-    document.getElementById('end_ts_tm').value = document.getElementById('end_ts_hour').value+':'+document.getElementById('end_ts_min').value;
-    if (document.getElementById('end_ts_tm').value==':') {
-    err += '<li>Timestamp / <strong>End Time</strong> cannot be empty!</li>';
-    } else if (document.getElementById('end_ts_tm').value.search(/^[0-9]{1,2}:[0-9]{1,2}$/im)) {
-    err += '<li>Timestamp / <strong>End Time</strong> is invalid!</li>';
-    }
-
-    var dt_1 = document.getElementById('start_ts_dt').value+' '+document.getElementById('start_ts_tm').value+':0';
-    var dt_2 = document.getElementById('end_ts_dt').value+' '+document.getElementById('end_ts_tm').value+':0';
-    if (compare_date(dt_1, dt_2)==false) err += '<li>Timestamp / <strong>End</strong> must be greater than or equals to <strong>Start</strong>!</li>';
-    //#-
-
-    //#/ COMPONENTS
-    indx=0;
-    $('.component_items .type_').each(function()
-    {
-        indx++;
-        if ($(this).val()=='' || $(this).val()==null)
-        err += '<li>Component '+indx+' / <strong>Type</strong> cannot be empty!</li>';
+    //JQuery calendars
+    $(function() {
+        $.init_calendar('start_ts_dt');
+        $.init_calendar('end_ts_dt');
     });
 
-    indx=0;
-    $('.component_items .model_').each(function()
+    /** frontend form validation. This is for user mistakes and it not really a security feature, real validation is done at the backend
+    Also note that the frontend has its own form attempts checker based on js. **/
+    $.check_this = function()
     {
-        indx++;
-        if ($(this).val().length<5)
-        err += '<li>Component '+indx+' / <strong>Model</strong> must be at least 5 characters!</li>';
-    });
+        var err = '';
 
-    indx=0;
-    $('.component_items .serial_').each(function()
-    {
-        indx++;
-        if ($(this).val()=='')
-        err += '<li>Component '+indx+' / <strong>Serial Number</strong> cannot be empty!</li>';
-    });
-
-    indx=0;
-    $('.component_items .size_').each(function()
-    {
-        indx++;
-        if (parseFloat($(this).val())<0)
-        err += '<li>Component '+indx+' / <strong>Size</strong> is empty or invalid!</li>';
-    });
-
-    indx=0;
-    $('.component_items .Er_level_').each(function()
-    {
-        indx++;
-        if ($(this).val()=='' || $(this).val()==null)
-        err += '<li>Component '+indx+' / <strong>Er Level</strong> cannot be empty!</li>';
-    });
-
-    indx=0;
-    $('.component_items .status_').each(function()
-    {
-        indx++;
-        if ($(this).val()=='' || $(this).val()==null)
-        err += '<li>Component '+indx+' / <strong>Status</strong> cannot be empty!</li>';
-    });
-
-    //return true; //debug
-
-    if (err!='')
-    {
-        fancyAlert('Error', "Please clear the following <strong>ERROR(s)</strong>:<div style='height:10px;' /><ul>"+err+"</ul><div style='height:10px;' />");
-        return false;
-    }
-    else
-    {
-
-        //#/ Check attempts to form submission
-        if (aCheck(20)==false) {
-        err += '<strong class="red-txt">Too Many Too Fast!</strong><br />Please try again after a few minutes ..';
-        fancyAlert('Error', "<div style='height:10px;' />"+err+"<div style='height:15px;' />");
-        return false;
+        if (document.getElementById('lorem_ticket_id').value=='') {} else
+        if (document.getElementById('lorem_ticket_id').value.search(/^[0-9]{1,}$/i)<0) {
+            err += '<li><strong>Ticket Number</strong> can be numbers only!</li>';
         }
 
+        if (document.getElementById('performed_by').value=='') {
+            err += '<li><strong>Er Performed By</strong> cannot be empty!</li>';
+        }
+
+        if (document.getElementById('witnessed_by').value=='') {
+            err += '<li><strong>Er Witnessed By</strong> cannot be empty!</li>';
+        }
+
+        //#/Timestamp
+        if (document.getElementById('start_ts_dt').value=='') {
+            err += '<li>Timestamp / <strong>Start Date</strong> cannot be empty!</li>';
+        }
+
+        document.getElementById('start_ts_tm').value = document.getElementById('start_ts_hour').value+':'+document.getElementById('start_ts_min').value;
+        if (document.getElementById('start_ts_tm').value==':') {
+            err += '<li>Timestamp / <strong>Start Time</strong> cannot be empty!</li>';
+        } else if (document.getElementById('start_ts_tm').value.search(/^[0-9]{1,2}:[0-9]{1,2}$/im)) {
+            err += '<li>Timestamp / <strong>Start Time</strong> is invalid!</li>';
+        }
+
+        if (document.getElementById('end_ts_dt').value=='') {
+            err += '<li>Timestamp / <strong>End Date</strong> cannot be empty!</li>';
+        }
+
+        document.getElementById('end_ts_tm').value = document.getElementById('end_ts_hour').value+':'+document.getElementById('end_ts_min').value;
+        if (document.getElementById('end_ts_tm').value==':') {
+            err += '<li>Timestamp / <strong>End Time</strong> cannot be empty!</li>';
+        } else if (document.getElementById('end_ts_tm').value.search(/^[0-9]{1,2}:[0-9]{1,2}$/im)) {
+            err += '<li>Timestamp / <strong>End Time</strong> is invalid!</li>';
+        }
+
+        var dt_1 = document.getElementById('start_ts_dt').value+' '+document.getElementById('start_ts_tm').value+':0';
+        var dt_2 = document.getElementById('end_ts_dt').value+' '+document.getElementById('end_ts_tm').value+':0';
+        if (compare_date(dt_1, dt_2)==false) err += '<li>Timestamp / <strong>End</strong> must be greater than or equals to <strong>Start</strong>!</li>';
+        //#-
+
+        //#/ COMPONENTS
+        indx=0;
+        $('.component_items .type_').each(function() {
+            indx++;
+            if ($(this).val()=='' || $(this).val()==null) {
+                err += '<li>Component '+indx+' / <strong>Type</strong> cannot be empty!</li>';
+            }
+        });
+
+        indx=0;
+        $('.component_items .model_').each(function() {
+            indx++;
+            if ($(this).val().length<5) {
+                err += '<li>Component '+indx+' / <strong>Model</strong> must be at least 5 characters!</li>';
+            }
+        });
+
+        indx=0;
+        $('.component_items .serial_').each(function() {
+            indx++;
+            if ($(this).val()=='') {
+                err += '<li>Component '+indx+' / <strong>Serial Number</strong> cannot be empty!</li>';
+            }
+        });
+
+        indx=0;
+        $('.component_items .size_').each(function() {
+            indx++;
+            if (parseFloat($(this).val())<0) {
+                err += '<li>Component '+indx+' / <strong>Size</strong> is empty or invalid!</li>';
+            }
+        });
+
+        indx=0;
+        $('.component_items .Er_level_').each(function() {
+            indx++;
+            if ($(this).val()=='' || $(this).val()==null)
+            err += '<li>Component '+indx+' / <strong>Er Level</strong> cannot be empty!</li>';
+        });
+
+        indx=0;
+        $('.component_items .status_').each(function() {
+            indx++;
+            if ($(this).val()=='' || $(this).val()==null) {
+                err += '<li>Component '+indx+' / <strong>Status</strong> cannot be empty!</li>';
+            }
+        });
+
+        //return true; //debug
+
+        if (err!='') {
+            fancyAlert('Error', "Please clear the following <strong>ERROR(s)</strong>:<div style='height:10px;' /><ul>"+err+"</ul><div style='height:10px;' />");
+            return false;
+
+        } else {
+            //#/ Check attempts to form submission
+            if (aCheck(20)==false) {
+                err += '<strong class="red-txt">Too Many Too Fast!</strong><br />Please try again after a few minutes ..';
+                fancyAlert('Error', "<div style='height:10px;' />"+err+"<div style='height:15px;' />");
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    };
+
+    $.submit_report = function()
+    {
+        if ($.check_this()==false) {
+            return false;
+        }
         return true;
     }
 
-    return false;
-};
+    //------------------------------------------------------------------
 
-$.submit_report = function()
-{
-    if ($.check_this()==false) {return false;}
-    return true;
-}
-//------------------------------------------------------------------
+    var tab_index = 2000;
+    var new_smax = -1;
 
-var tab_index = 2000;
-var new_smax = -1;
-
-/** This method creates mini forms within the form dynamically on click. I will leave this code out, let me know if you need to see it **/
-function add_more_component_items(def_v, copy_first_row)
-{
-    $(clone_v).insertBefore('.'+keyword+'items #last_divi');
-};
-//------------------------------------------------------------------
+    /** This method creates mini forms within the form dynamically on click. I will leave this code out, let me know if you need to see it **/
+    function add_more_component_items(def_v, copy_first_row)
+    {
+        $(clone_v).insertBefore('.'+keyword+'items #last_divi');
+    };
+    //------------------------------------------------------------------
 
 });
 </script>
@@ -173,7 +172,8 @@ function add_more_component_items(def_v, copy_first_row)
         <?php if ($read_only) {
         echo "<div class=\"label\">Certificate Number:</div>
         <div class=\"val\">{$empt['certificate_number']}</div>
-        <div style=\"clear:both; height:10px;\"></div>"; } ?>
+        <div style=\"clear:both; height:10px;\"></div>";
+        } ?>
 
         <div class="label">Ticket:</div>
         <div class="val">
@@ -181,11 +181,11 @@ function add_more_component_items(def_v, copy_first_row)
 
             <?php if ($read_only<=0) { ?>
             <input type="hidden" name="old_ticket" value="<?=@$empt['old_ticket']?>" />
-            <input type="number" min="1" id="lorem_ticket_id" name="lorem_ticket_id" max="2147483647" value="<?php echo ($lorem_ticket_id>0? $lorem_ticket_id:''); ?>"
+            <input type="number" min="1" id="lorem_ticket_id" name="lorem_ticket_id" max="2147483647" value="<?php echo $lorem_ticket_id>0? $lorem_ticket_id:''; ?>"
             pattern="^[0-9]{0,}$" style="width:120px;" tabindex="<?=$tabindex++?>" />
-            <?php }else{
+            <?php } else {
                 echo !empty($lorem_ticket_id)? $lorem_ticket_id:'-';
-            ?><?php } ?>
+            } ?>
         </div>
         <div style="clear:both; height:10px;"></div>
 
@@ -197,10 +197,10 @@ function add_more_component_items(def_v, copy_first_row)
             <option value="">Select-</option>
             <?php foreach($lorem_contacts as $v) {echo "<option value=\"{$v['id']}\">{$v['name']}</option>";} ?>
             </select>
-            <?php if (!empty($performed_by)) echo "<script>document.getElementById('performed_by').value='{$performed_by}';</script>"; ?>
+            <?php if (!empty($performed_by)) {echo "<script>document.getElementById('performed_by').value='{$performed_by}';</script>";} ?>
             <span class="req">&nbsp;*</span>
 
-            <?php }else{ ?><?php echo empty($lorem_contacts[$empt['performed_by']])? $empt['performed_by']:$lorem_contacts[$empt['performed_by']]["name"]; ?><?php } ?>
+            <?php } else { ?><?php echo empty($lorem_contacts[$empt['performed_by']])? $empt['performed_by']:$lorem_contacts[$empt['performed_by']]["name"]; ?><?php } ?>
         </div>
         <div style="clear:both; height:10px;"></div>
 
@@ -215,7 +215,7 @@ function add_more_component_items(def_v, copy_first_row)
 
             <?php echo adminHelper::create_time_field('start_ts', $tabindex, $empt); ?>
             <span class="req">&nbsp;*</span>
-            <?php }else{ ?><?=@date('d/m/Y', strtotime($empt['start_ts_dt']))?> &nbsp;<?=@r::pretty_time($empt['start_ts_tm'])?><br /><?php } ?>
+            <?php } else { ?><?=@date('d/m/Y', strtotime($empt['start_ts_dt']))?> &nbsp;<?=@r::pretty_time($empt['start_ts_tm'])?><br /><?php } ?>
 
             <?php if ($read_only<=0) { ?><br /><?php } ?>
             <br />
@@ -228,17 +228,15 @@ function add_more_component_items(def_v, copy_first_row)
 
             <?php echo adminHelper::create_time_field('end_ts', $tabindex, $empt); ?>
             <span class="req">&nbsp;*</span>
-            <?php }else{ ?><?=@date('d/m/Y', strtotime($empt['end_ts_dt']))?> &nbsp;<?=@r::pretty_time($empt['end_ts_tm'])?><br /><?php } ?>
+            <?php } else { ?><?=@date('d/m/Y', strtotime($empt['end_ts_dt']))?> &nbsp;<?=@r::pretty_time($empt['end_ts_tm'])?><br /><?php } ?>
 
             <?php
-            if ($read_only>0)
-            {
+            if ($read_only>0) {
                 $request_change_dur = @r::time_diff_str(
                 "{$empt['start_ts_dt']} {$empt['start_ts_tm']}:00",
                 "{$empt['end_ts_dt']} {$empt['end_ts_tm']}:00");
 
-                if (!empty($request_change_dur))
-                {
+                if (!empty($request_change_dur)) {
                     echo '<br />
                     <span class="submsg" style="display:block;">Duration:</span>
                     '.$request_change_dur;
@@ -274,52 +272,50 @@ function add_more_component_items(def_v, copy_first_row)
             onclick="add_more_component_items(null, true);">Or copy first row into a new row? Click here.</a></div>
 
             <?php
-            }
-            else
-            {
+            } else {
                 $a_i = 0;
-                if (isset($empt['component_index']) && is_array($empt['component_index']))
-                foreach($empt['component_index'] as $pv)
-                {
-                    $a_i++;
+                if (isset($empt['component_index']) && is_array($empt['component_index'])) {
+                    foreach($empt['component_index'] as $pv) {
+                        $a_i++;
 
-                    echo '
-                    <div class="label">Type '.$a_i.':</div>
-                    <div class="val">'.$fixed_lists['component_types'][$pv['type']].'</div>
-                    <div style="clear:both; height:10px;"></div>
+                        echo '
+                        <div class="label">Type '.$a_i.':</div>
+                        <div class="val">'.$fixed_lists['component_types'][$pv['type']].'</div>
+                        <div style="clear:both; height:10px;"></div>
 
-                    <div class="label">Model:</div>
-                    <div class="val">'.$pv['model'].'</div>
-                    <div style="clear:both; height:10px;"></div>
+                        <div class="label">Model:</div>
+                        <div class="val">'.$pv['model'].'</div>
+                        <div style="clear:both; height:10px;"></div>
 
-                    <div class="label">Serial:</div>
-                    <div class="val">'.$pv['serial'].'</div>
-                    <div style="clear:both; height:10px;"></div>
+                        <div class="label">Serial:</div>
+                        <div class="val">'.$pv['serial'].'</div>
+                        <div style="clear:both; height:10px;"></div>
 
-                    <div class="label">Asset Tag:</div>
-                    <div class="val">'.(empty($pv['asset_tag'])? '-':$pv['asset_tag']).'</div>
-                    <div style="clear:both; height:10px;"></div>
+                        <div class="label">Asset Tag:</div>
+                        <div class="val">'.(empty($pv['asset_tag'])? '-':$pv['asset_tag']).'</div>
+                        <div style="clear:both; height:10px;"></div>
 
-                    <div class="label">Size:</div>
-                    <div class="val">'.(str_replace('#', '', $pv['size'])).'</div>
-                    <div style="clear:both; height:10px;"></div>
+                        <div class="label">Size:</div>
+                        <div class="val">'.(str_replace('#', '', $pv['size'])).'</div>
+                        <div style="clear:both; height:10px;"></div>
 
-                    <div class="label">Level:</div>
-                    <div class="val">'.$fixed_lists['component_Er_levels'][$pv['Er_level']].'</div>
-                    <div style="clear:both; height:10px;"></div>
+                        <div class="label">Level:</div>
+                        <div class="val">'.$fixed_lists['component_Er_levels'][$pv['Er_level']].'</div>
+                        <div style="clear:both; height:10px;"></div>
 
-                    <div class="label">Status:</div>
-                    <div class="val">'.$fixed_lists['status'][$pv['status']].'</div>
-                    ';
+                        <div class="label">Status:</div>
+                        <div class="val">'.$fixed_lists['status'][$pv['status']].'</div>
+                        ';
 
-                    if ($a_i<@count($empt['component_index'])) {
-                    echo '
-                    <div style="clear:both; height:10px;"></div>
-                    <div class="mbl_only" style="clear:both; height:15px;"></div>
-                    <hr /><br />
-                    ';
+                        if ($a_i<@count($empt['component_index'])) {
+                            echo '
+                            <div style="clear:both; height:10px;"></div>
+                            <div class="mbl_only" style="clear:both; height:15px;"></div>
+                            <hr /><br />
+                            ';
+                        }
                     }
-                } //foreach..
+                }
             }
             ?>
         </div>
@@ -337,13 +333,13 @@ function add_more_component_items(def_v, copy_first_row)
     <tr>
     <td valign="middle" style="width:35%;"><br />
         <input type="radio" id="generate_pdf" name="generate_option" value="generate_pdf" autocomplete="false" tabindex="<?=$tabindex++?>"
-        <?php if (isset($empt['generate_option'])  && ($empt['generate_option']=='generate_pdf')) echo "checked='checked'"; ?> /> Download Certificate?&nbsp;
+        <?php if (isset($empt['generate_option']) && $empt['generate_option']=='generate_pdf') {echo "checked='checked'";} ?> /> Download Certificate?&nbsp;
         <span class="submsg">//download the PDF file while saving the data?</span>
         <div style="clear:both; height:5px;"></div>
         <div class="mobile_only" style="clear:both; height:10px;"></div>
 
         <input type="radio" id="email_now" name="generate_option" value="email_now" autocomplete="false" tabindex="<?=$tabindex++?>"
-        <?php if (isset($empt['generate_option'])  && ($empt['generate_option']=='email_now')) echo "checked='checked'"; ?> /> Email now?
+        <?php if (isset($empt['generate_option']) && $empt['generate_option']=='email_now') {echo "checked='checked'";} ?> /> Email now?
         <br class="dsktop_only" />
 
         <div style="clear:both; height:25px;"></div>

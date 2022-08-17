@@ -13,8 +13,15 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 */
 class Kernel extends ConsoleKernel
 {
-    protected $commands = [];
+    /**
+     * @var array $commands
+     */
+    protected array $commands = [];
 
+    /**
+     * function schedule
+     * @param Schedule $schedule
+     */
     protected function schedule(Schedule $schedule)
     {
         #/ Called directly
@@ -27,6 +34,9 @@ class Kernel extends ConsoleKernel
         })->monthlyOn(1, '01:00'); //1st of every month at 1am
     }
 
+    /**
+     * function commands
+     */
     protected function commands()
     {
         $this->load(__DIR__.'/Commands');
