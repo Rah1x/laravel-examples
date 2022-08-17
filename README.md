@@ -1,8 +1,8 @@
 # laravel Examples
 
-Here are some Laravel coding samples to show you how I work. Its not runnable as files not connected to each other but it gives you general idea about my coding style and depth.
+Here are some Laravel coding samples to show you how I work. Its not runnable as the files are not connected to each other but it gives you general idea about my coding style.
 
-Ive placed the files in appropriate directories based on `laravel 7x` (but only those dirs that I needed for the samples and not all the dirs of laravel setup are here), therefore please check all dirs for example files. The coding is in `php7x`.
+Ive placed the files in appropriate directories based on `laravel 7x` structure (only those dirs that I needed for the samples and not all the dirs of laravel setup are here), therefore please check all dirs for example files. The coding is in `php7x`.
 
 Lastly, Ive left notes as comments in each file to let you know whats going on (as much as I could).
 
@@ -33,7 +33,7 @@ Route file, see how I pass additional params to each route, I catch them in the 
 These folders are not in laravel itself, but ive created them to better oprganize my code.
 
 9) Naming conventions:\
-Generally I do a lot more efforts in naming conventions but in this sample I just wanted to do bit more of the logic so I might have skipped it
+Usually I do a lot more efforts in naming conventions but in this sample I just wanted to show a bit of logical implementation and so I might have skipped it.
 
 Let me know if you need even more samples for more fun and tricky things I do in laravel.
 
@@ -43,7 +43,7 @@ Generally I use the following convention:
 1. `#/` code block heading related to few line(s) of code after
 2. `//` small hint about the code on the left to this
 3. `//` also, to comment out few lines of code
-4. `/* */` to define a whole block (class, method etc) with a formal descriptor
+4. `/* */` to define a whole block (class, method etc) with a formal descriptors
 5. `/* */` also, to comment out a whole block of code
 
 In this sample, ive done extra extra commenting to tell you whats going on.
