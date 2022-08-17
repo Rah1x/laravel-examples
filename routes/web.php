@@ -17,7 +17,6 @@ $rg_array = [
 ];
 
 Route::group($rg_array, function() use($rg_array) {
-
     Route::match(['GET', 'POST'], 'helloWorld', ['as'=>"{$rg_array['section_prefix']}.helloWorld", 'uses'=>'helloWorld@index']); //list page
     Route::match(['GET', 'POST'], 'helloWorld/opr', ['as'=>"{$rg_array['section_prefix']}.helloWorld-opr", 'uses'=>'helloWorldOpr@index']); //operation page
 });
